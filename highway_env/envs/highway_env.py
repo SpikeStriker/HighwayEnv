@@ -121,6 +121,17 @@ class HighwayEnv(AbstractEnv):
             if isinstance(self.vehicle, ControlledVehicle)
             else self.vehicle.lane_index[2]
         )
+        from_lane=(
+            self.vehicle.target_lane_index[0]
+            if isinstance(self.vehicle, ControlledVehicle)
+            else self.vehicle.lane_index[0]
+        )
+        to_lane=(
+            self.vehicle.target_lane_index[1]
+            if isinstance(self.vehicle, ControlledVehicle)
+            else self.vehicle.lane_index[1]
+        )
+        laneChange=(0 if from_lane==to_lane else 1)
         # Use forward speed rather than speed, see https://github.com/eleurent/highway-env/issues/268
         forward_speed = self.vehicle.speed * np.cos(self.vehicle.heading)
         scaled_speed = utils.lmap(
@@ -131,6 +142,7 @@ class HighwayEnv(AbstractEnv):
             "right_lane_reward": lane / max(len(neighbours) - 1, 1),
             "high_speed_reward": np.clip(scaled_speed, 0, 1),
             "on_road_reward": float(self.vehicle.on_road),
+            "lane_change_reward":float(self.config["lane_change_reward"]*laneChange)
         }
 
     def _is_terminated(self) -> bool:
